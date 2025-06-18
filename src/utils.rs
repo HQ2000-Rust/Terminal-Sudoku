@@ -190,6 +190,11 @@ pub mod general {
         }
 
         #[inline]
+        fn breakup_menu() {
+            println!("-Breakup if the game is unsolvable-");
+        }
+
+        #[inline]
         fn quit_menu() {
             println!("Do you want to quit? (y/n)");
             if get_input().trim().to_lowercase() == "y" {
@@ -201,13 +206,33 @@ pub mod general {
             general_menu();
         }
         mod settings {
+            use std::io::BufRead;
+
+            enum ChangeSetting {
+                BreakupOnUnsolvable(bool),
+                Stopwatch(bool),
+            }
+            struct Settings {
+                breakup_on_unsolvable: bool,
+                stopwatch: bool,
+            }
+            impl Default for Settings {
+                fn default() -> Self {
+                    Settings {
+                        breakup_on_unsolvable: true,
+                        stopwatch: true,
+                    }
+                }
+            }
+            static SETTINGS_ENV_VAR: &str = "TERMINAL_SUDOKU_SETTINGS";
+
             #[inline]
             pub fn settings_menu() {
                 println!("-Settings-");
                 println!("Type in the corresponding number and press ENTER to change a setting");
                 println!("1. Breakup if the game is unsolvable");
                 println!("2. Stopwatch");
-                println!("3. Save settings in a file");
+                println!("3. Save settings in an environment variable");
                 println!("4. Exit the settings");
                 match super::get_input().trim().parse::<i32>() {
                     Ok(1) => {}
@@ -216,11 +241,55 @@ pub mod general {
                     _ => {}
                 }
             }
-        }
-        #[inline]
-        fn breakup_menu() {
-            println!("-Breakup if the game is unsolvable-");
             
+            fn to_env_settings(settings: Settings) {
+                
+            }
+
+            fn edit_setting(setting: ChangeSetting) {
+                let settings = Settings::default();
+                if let Some(s) = get_settings() {
+                    
+                }
+            }
+            fn parse_settings(string: String) -> Settings {
+                let strings = string.split(",").collect::<Vec<&str>>();
+                use std::collections::HashMap;
+                let mut settings: HashMap<&str, Option<bool>> = HashMap::new();
+                for string in strings {
+                    let mut pair = string.split(":").collect::<Vec<&str>>();
+
+                    settings.insert(
+                        pair[0],
+                        match pair[1] {
+                            "true" => Some(true),
+                            "false" => Some(false),
+                            _ => None,
+                        },
+                    );
+                }
+                let mut result = Settings::default();
+                let mut changed = false;
+                //double some since env filtering and hashmap returns it
+                if let Some(Some(b)) = settings.get("breakup_on_unsolvable") {
+                    result.breakup_on_unsolvable = *b;
+                }
+                if let Some(Some(b)) = settings.get("breakup_on_unsolvable") {
+                    result.stopwatch = *b;
+                }
+                result
+            }
+
+            fn get_settings() -> Option<String> {
+                let mut settings = None;
+                for env_pair in std::env::vars() {
+                    let (key, value) = env_pair;
+                    if key == SETTINGS_ENV_VAR {
+                        settings = Some(value);
+                    }
+                }
+                settings
+            }
         }
     }
 }
