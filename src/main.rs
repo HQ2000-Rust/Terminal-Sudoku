@@ -1,9 +1,11 @@
 use crate::utils::field_utils::{Field, Number, PlayingField};
+use std::io::{Read, Write};
 
 mod utils;
 
 fn main() {
-    println!("Welcome to");
+    println!("Welcome to Terminal Sudoku!");
+
     /*let field=PlayingField::from([[Field::Empty;9],
         [Field::Empty;9],
         [Field::Number(Number::Seven);9],
@@ -15,14 +17,14 @@ fn main() {
         [Field::Empty;9],]);
     field.print();*/
 
-    utils::general::menu::general_menu();
-    start_game_loop();
+    game_loop();
 }
 
 #[inline]
-fn start_game_loop() {
+fn game_loop() {
     use utils::field_utils::{Field, PlayingField};
     loop {
+        utils::general::menu::general_menu();
         let mut playing_field = PlayingField::new();
     }
 }
