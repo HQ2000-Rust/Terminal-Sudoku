@@ -19,11 +19,12 @@ fn main() {
 #[inline]
 fn game_loop(settings: Flags) {
     use utils::field_utils::{Field, PlayingField};
+    let mut stats=crate::utils::general::stats::Stats::new();
     'round: loop {
         utils::general::menu::general_menu();
         let mut playing_field = PlayingField::new();
         //TODO!: timer
-        loop {
+        'turn: loop {
             println!("The field:");
             playing_field.print();
             println!("Which field do you want to change?");
@@ -69,7 +70,9 @@ fn game_loop(settings: Flags) {
             let field_type_i32 = loop {
                 println!("Which number should be inserted? Type it in and press ENTER.");
                 if let Ok(number) = get_input().trim().parse::<i32>() {
-                    if !(number >= 1 && number <= 9) {
+                    if number >= 1 && number <= 9 {
+                        println!("Number: {number}");
+                        println!("{number}");
                         break number;
                     }
                 }
@@ -78,10 +81,29 @@ fn game_loop(settings: Flags) {
             playing_field.set(
                 x_coord,
                 y_coord,
-                Field::Number(crate::utils::field_utils::i32_to_Number(field_type_i32).expect({
-                    unreachable!()
-                })),
-            )
+                Field::Number(
+                    {
+                        crate::utils::field_utils::i32_to_Number(&field_type_i32).expect("already bound and type checked, so this should be impossible")
+                    }
+                ),
+            );
+            use crate::utils::field_utils::SolvingState;
+            match playing_field.solving_state() {
+                SolvingState::Solvable=>{},
+                SolvingState::Unsolvable=>{
+                    stats.add_lost();
+                    println!("It's unsolvable now! (Press ENTER)");
+                    get_input();
+                    break 'round;
+               },
+                SolvingState::Solved=>{
+                    stats.add_won();
+                    println!("Solved! (Press ENTER)");
+                    get_input();
+                    break 'round;
+                }
+            }
+            
         }
     }
 }
