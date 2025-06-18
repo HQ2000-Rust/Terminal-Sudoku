@@ -18,7 +18,7 @@ pub mod field_utils {
         }
     }
 
-    #[derive(PartialEq, PartialOrd, Copy, Clone, Ord, Eq)]
+    #[derive(PartialEq, PartialOrd, Copy, Clone, Ord, Eq, Debug)]
     pub enum Number {
         One,
         Two,
@@ -31,17 +31,17 @@ pub mod field_utils {
         Nine,
     }
 
-    pub fn i32_to_Number(value: i32) -> Option<Number> {
+    pub fn i32_to_Number(value: &i32) -> Option<Number> {
+        println!("Number2: {value}");
         match value {
-            0 => Some(Number::One),
-            1 => Some(Number::Two),
-            2 => Some(Number::Three),
-            3 => Some(Number::Four),
-            4 => Some(Number::Five),
-            5 => Some(Number::Six),
-            6 => Some(Number::Seven),
-            7 => Some(Number::Eight),
-            8 => Some(Number::Nine),
+            1 => Some(Number::One),
+            2 => Some(Number::Two),
+            3 => Some(Number::Three),
+            4 => Some(Number::Four),
+            5 => Some(Number::Five),
+            6 => Some(Number::Six),
+            7 => Some(Number::Seven),
+            8 => Some(Number::Eight),
             9 => Some(Number::Nine),
             _ => None,
         }
@@ -95,7 +95,7 @@ pub mod field_utils {
         //does panic on operation out of bounds!
         //1-indexed!
         pub fn access(&self, x_coord: usize, y_coord: usize) -> &Field {
-            &self.field[x_coord - 1][y_coord - 1]
+            &self.field[y_coord - 1][x_coord - 1]
         }
 
         //same rules as for PlayingField::access ^^^^^
@@ -119,6 +119,7 @@ pub mod field_utils {
         pub fn print(&self) {
             let sep1 = "\n  -- -- -- -- -- -- -- -- -- --";
             let sep2 = " |  ";
+            print!("x  1  2  3   4  5  6   7  8  9");
             print!("{sep1}");
             //chunk = 3 horizontal rows
             for chunk in 1..=3 {
@@ -127,7 +128,7 @@ pub mod field_utils {
                     println!();
                     //frac1=third part of a horiz. row
                     for frac1 in 1..=3 {
-                        print!(" |  ");
+                        print!("{sep2}");
                         //field = field
                         for field in 1..=3 {
                             print!(
@@ -137,11 +138,14 @@ pub mod field_utils {
                         }
                     }
                     print!("{sep2}");
+                    print!("{}", ((chunk-1)*3+row));
                 }
-                println!("{sep1}");
+                print!("{sep1}");
             }
+            println!("   y");
+        }
 
-            pub fn solving_state() -> SolvingState {
+            pub fn solving_state(&self) -> SolvingState {
                 {
                     use super::field_utils::Field::Number as F;
                     use super::field_utils::Number as N;
@@ -162,7 +166,7 @@ pub mod field_utils {
             }
         }
     }
-}
+
 
 pub mod general {
     pub fn get_input() -> String {
@@ -171,6 +175,29 @@ pub mod general {
             .read_line(&mut input)
             .expect("I/O needs to work in order to play this game!");
         input
+    }
+    
+    pub mod stats {
+        pub struct Stats {
+            pub won: u32,
+            pub lost: u32,
+            pub fastest_run: Option<std::time::Duration>,
+        }
+        impl Stats {
+            pub fn new() -> Stats {
+                Stats {
+                    won:0,
+                    lost:0,
+                    fastest_run: None,
+                }
+            }
+            pub fn add_lost(&mut self) {
+            self.lost+= 1;
+            }
+            pub fn add_won(&mut self) {
+            self.won+=1;
+            }
+        }
     }
 
     pub mod menu {
