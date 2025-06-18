@@ -1,0 +1,57 @@
+//code snippets I dont need anymore, but I don't want to delete them since I put some work into them...
+
+            fn edit_setting(setting: ChangeSetting) {
+                let settings = Settings::default();
+                if let Some(s) = get_settings_from_env_var() {
+                }
+            }
+            fn parse_settings(string: String) -> Settings {
+                let strings = string.split(",").collect::<Vec<&str>>();
+                use std::collections::HashMap;
+                let mut settings: HashMap<&str, Option<bool>> = HashMap::new();
+                for string in strings {
+                    let mut pair = string.split(":").collect::<Vec<&str>>();
+                    if pair.len() == 2 {
+                        settings.insert(
+                            pair[0],
+                            match pair[1] {
+                                "true" => Some(true),
+                                "false" => Some(false),
+                                _ => None,
+                            },
+                        );
+                    }
+                }
+                let mut result = Settings::default();
+                let mut changed = false;
+                //double some since env filtering and hashmap returns it
+                if let Some(Some(b)) = settings.get("breakup_on_unsolvable") {
+                    result.breakup_on_unsolvable = *b;
+                }
+                if let Some(Some(b)) = settings.get("stopwatch") {
+                    result.stopwatch = *b;
+                }
+                result
+            }
+
+            fn get_settings_from_env_var() -> Option<String> {
+                let mut settings = None;
+                for env_pair in std::env::vars() {
+                    let (key, value) = env_pair;
+                    if key == SETTINGS_ENV_VAR {
+                        settings = Some(value);
+                    }
+                }
+                settings
+            }
+            pub fn get_settings() -> Settings {
+                let raw_settings=get_settings_from_env_var().unwrap_or_default();
+                parse_settings(raw_settings)
+            }
+            
+                        #[derive(Debug)]
+                        pub enum ChangeSetting {
+                            BreakupOnUnsolvable(bool),
+                            Stopwatch(bool),
+                        }
+                                    static SETTINGS_ENV_VAR: &str = "TERMINAL_SUDOKU_SETTINGS";
