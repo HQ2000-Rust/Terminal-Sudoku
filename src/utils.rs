@@ -1,7 +1,7 @@
 pub mod field_utils {
     use std::fmt::Display;
 
-    #[derive(PartialEq, Copy, Clone)]
+    #[derive(PartialEq, Copy, Clone, Ord, PartialOrd, Eq)]
     pub enum Field {
         Empty,
         Number(Number),
@@ -18,7 +18,7 @@ pub mod field_utils {
         }
     }
 
-    #[derive(PartialEq, Copy, Clone)]
+    #[derive(PartialEq, PartialOrd, Copy, Clone, Ord, Eq)]
     pub enum Number {
         One,
         Two,
@@ -29,6 +29,22 @@ pub mod field_utils {
         Seven,
         Eight,
         Nine,
+    }
+
+    pub fn i32_to_Number(value: i32) -> Option<Number> {
+        match value {
+            0 => Some(Number::One),
+            1 => Some(Number::Two),
+            2 => Some(Number::Three),
+            3 => Some(Number::Four),
+            4 => Some(Number::Five),
+            5 => Some(Number::Six),
+            6 => Some(Number::Seven),
+            7 => Some(Number::Eight),
+            8 => Some(Number::Nine),
+            9 => Some(Number::Nine),
+            _ => None,
+        }
     }
     impl Display for Number {
         fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -63,6 +79,7 @@ pub mod field_utils {
     pub struct PlayingField {
         field: [[Field; 9]; 9],
     }
+
     impl PlayingField {
         pub fn new() -> Self {
             PlayingField {
@@ -86,8 +103,8 @@ pub mod field_utils {
             self.field[x_coord - 1][y_coord - 1] = field;
         }
 
-        //returns false when this operation is not possible, x-/y-coords are *NOT* 0-indexed
-        fn set_field(&mut self, x_coord: usize, y_coord: usize, field: &Field) -> FieldSetResult {
+        //returns false when this operation is not possible, x-/y-coords are *NOT* 0-indexed (likely unused)
+        fn set_checked(&mut self, x_coord: usize, y_coord: usize, field: &Field) -> FieldSetResult {
             if x_coord <= 9 && y_coord <= 9 {
                 let mut target_field = self.access(x_coord, y_coord);
                 if *target_field == Field::Empty {
@@ -121,7 +138,7 @@ pub mod field_utils {
                     }
                     print!("{sep2}");
                 }
-                print!("{sep1}");
+                println!("{sep1}");
             }
 
             pub fn solving_state() -> SolvingState {
@@ -163,35 +180,21 @@ pub mod general {
         pub fn general_menu() {
             println!("-Menu-");
             println!("1. Play Sudoku");
-            println!("2. View the leaderboard");
-            println!("3. Settings");
-            println!("4. Quit");
+            println!("2. Settings");
+            println!("3. Quit");
             println!("Type the corresponding number and press ENTER to choose an option");
             match get_input().trim().parse::<i32>() {
                 Ok(1) => {
                     //nothing, so it continues with the game
                 }
                 Ok(2) => {
-                    leaderboard_menu();
-                }
-                Ok(3) => {
                     settings::settings_menu();
                 }
-                //Typing in "4" or anything else mean quit
+                //Typing in "3" or anything else means quit
                 _ => {
                     quit_menu();
                 }
             }
-        }
-        #[inline]
-        fn leaderboard_menu() {
-            println!("-Leaderboard-");
-            todo!("leaderboard impl");
-        }
-
-        #[inline]
-        fn breakup_menu() {
-            println!("-Breakup if the game is unsolvable-");
         }
 
         #[inline]
@@ -205,90 +208,47 @@ pub mod general {
             }
             general_menu();
         }
-        mod settings {
-            use std::io::BufRead;
+        pub mod settings {
+            use crate::utils::general::get_input;
 
-            enum ChangeSetting {
-                BreakupOnUnsolvable(bool),
-                Stopwatch(bool),
+            #[derive(Debug, Default)]
+            pub struct Flags {
+                pub stopwatch: bool,
+                pub sudoku_maker: bool,
+                pub templates: bool,
             }
-            struct Settings {
-                breakup_on_unsolvable: bool,
-                stopwatch: bool,
-            }
-            impl Default for Settings {
-                fn default() -> Self {
-                    Settings {
-                        breakup_on_unsolvable: true,
-                        stopwatch: true,
+
+            pub fn get_raw_flags() -> Vec<String> {
+                let mut active_flags = Vec::new();
+                for flag in ["stopwatch", "sudoku_maker", "templates"] {
+                    if std::env::args().collect::<String>().contains(flag) {
+                        active_flags.push(flag.to_string());
                     }
                 }
+                active_flags
             }
-            static SETTINGS_ENV_VAR: &str = "TERMINAL_SUDOKU_SETTINGS";
 
             #[inline]
             pub fn settings_menu() {
                 println!("-Settings-");
-                println!("Type in the corresponding number and press ENTER to change a setting");
-                println!("1. Breakup if the game is unsolvable");
-                println!("2. Stopwatch");
-                println!("3. Save settings in an environment variable");
-                println!("4. Exit the settings");
-                match super::get_input().trim().parse::<i32>() {
-                    Ok(1) => {}
-                    Ok(2) => {}
-                    Ok(3) => {}
-                    _ => {}
+                println!(
+                    "To apply settings, you can run this exe with some of the following flags:"
+                );
+                println!(
+                    " --stopwatch -> enables a stopwatch that tracks how long you need to solve the Sudoku"
+                );
+                println!(
+                    " --sudoku-maker -> asks you to save your field after every turn as a string you can later use as a template"
+                );
+                println!(
+                    " --template -> asks you to use a template you obtained with --sudoku-maker before every round, you can also select a standard template (e.g. an empty field, which you normally can't obtain)"
+                );
+                println!("The active flags are:");
+                for flag in get_raw_flags() {
+                    println!(" --{}", flag);
                 }
-            }
-            
-            fn to_env_settings(settings: Settings) {
-                
-            }
-
-            fn edit_setting(setting: ChangeSetting) {
-                let settings = Settings::default();
-                if let Some(s) = get_settings() {
-                    
-                }
-            }
-            fn parse_settings(string: String) -> Settings {
-                let strings = string.split(",").collect::<Vec<&str>>();
-                use std::collections::HashMap;
-                let mut settings: HashMap<&str, Option<bool>> = HashMap::new();
-                for string in strings {
-                    let mut pair = string.split(":").collect::<Vec<&str>>();
-
-                    settings.insert(
-                        pair[0],
-                        match pair[1] {
-                            "true" => Some(true),
-                            "false" => Some(false),
-                            _ => None,
-                        },
-                    );
-                }
-                let mut result = Settings::default();
-                let mut changed = false;
-                //double some since env filtering and hashmap returns it
-                if let Some(Some(b)) = settings.get("breakup_on_unsolvable") {
-                    result.breakup_on_unsolvable = *b;
-                }
-                if let Some(Some(b)) = settings.get("breakup_on_unsolvable") {
-                    result.stopwatch = *b;
-                }
-                result
-            }
-
-            fn get_settings() -> Option<String> {
-                let mut settings = None;
-                for env_pair in std::env::vars() {
-                    let (key, value) = env_pair;
-                    if key == SETTINGS_ENV_VAR {
-                        settings = Some(value);
-                    }
-                }
-                settings
+                println!("Press ENTER to continue");
+                get_input();
             }
         }
     }
