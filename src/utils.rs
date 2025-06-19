@@ -1,13 +1,12 @@
 pub mod field_utils {
-    use std::cmp::Ordering;
     use std::collections::HashSet;
     use std::fmt::Display;
 
     pub fn decode(string: &String) -> Option<PlayingField> {
         let mut result = [[Field::Empty; 9]; 9];
-        for row in 8..=0 {
-            for field in 8..=0 {
-                result[row][field] = match string.chars().nth((row + 1) * 9 + field).unwrap() {
+        for row in 0..=8 {
+            for field in 0..=8 {
+                result[row][field] = match string.chars().nth(row * 9 + field).unwrap() {
                     'E' => Field::Empty,
                     '1' => Field::Number(Number::One),
                     '2' => Field::Number(Number::Two),
@@ -18,11 +17,13 @@ pub mod field_utils {
                     '7' => Field::Number(Number::Seven),
                     '8' => Field::Number(Number::Eight),
                     '9' => Field::Number(Number::Nine),
-                    _ => return None,
+                    _ => {
+                        return None;
+                    }
                 }
             }
         }
-        None
+        Some(PlayingField::from(result))
     }
     #[derive(PartialEq, Copy, Clone, Ord, PartialOrd, Eq, Hash, Debug)]
     pub enum Field {
@@ -54,7 +55,7 @@ pub mod field_utils {
         Nine,
     }
 
-    //done here to show that it's a conversion from a i32 to a Number enum variant, "number_to_number" would be unclear
+    //done here to show that it's a conversion from an i32 to a Number enum variant, "number_to_number" would be unclear
     pub fn i32_to_Number(value: &i32) -> Option<Number> {
         match value {
             1 => Some(Number::One),
@@ -87,17 +88,14 @@ pub mod field_utils {
         }
     }
 
+    #[derive(Debug)]
     pub enum SolvingState {
         Solvable,
         Unsolvable,
         Solved,
     }
 
-    //prob unused
-
-
-
-    #[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone)]
+    #[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Debug)]
     pub struct PlayingField {
         field: [[Field; 9]; 9],
     }
@@ -117,7 +115,7 @@ pub mod field_utils {
         //does panic on operation out of bounds!
         //1-indexed!
         pub fn access(&self, x_coord: usize, y_coord: usize) -> &Field {
-            &self.field[y_coord - 1][x_coord - 1]
+            &self.field[x_coord - 1][y_coord - 1]
         }
 
         //same rules as for PlayingField::access ^^^^^
@@ -128,7 +126,7 @@ pub mod field_utils {
         pub fn print(&self) {
             let sep1 = "\n  -- -- -- -- -- -- -- -- -- --";
             let sep2 = " |  ";
-            print!("x  1  2  3   4  5  6   7  8  9");
+            print!("x   1 2 3     4 5 6     7 8 9");
             print!("{sep1}");
             //chunk = 3 horizontal rows
             for chunk in 1..=3 {
@@ -142,7 +140,7 @@ pub mod field_utils {
                         for field in 1..=3 {
                             print!(
                                 "{} ",
-                                self.access((chunk - 1) * 3 + row, (frac1 - 1) * 3 + field)
+                                self.access((frac1 - 1) * 3 + field, (chunk - 1) * 3 + row)
                             )
                         }
                     }
@@ -168,10 +166,9 @@ pub mod field_utils {
                 F(N::Eight),
                 F(N::Nine),
             ]);
-
             //horizontal correctness
-            let mut y_pattern = pattern.clone();
             for row_counter in 0..=8 {
+                let mut y_pattern = pattern.clone();
                 let row = self.field[row_counter].to_vec();
                 for field in row.iter() {
                     if *field != Field::Empty {
@@ -184,12 +181,12 @@ pub mod field_utils {
             }
 
             //vertical correctness
-            let mut x_pattern = pattern.clone();
-            for vert_row_counter in 0..=8 {
+            for vert_row in 0..=8 {
                 let mut row = Vec::new();
                 for i in 0..=8 {
-                    row.push(self.field[i][vert_row_counter]);
+                    row.push(self.field[i][vert_row]);
                 }
+                let mut x_pattern = pattern.clone();
                 for field in row.iter() {
                     if *field != Field::Empty {
                         match x_pattern.remove(field) {
@@ -199,13 +196,40 @@ pub mod field_utils {
                     }
                 }
             }
-            if x_pattern.is_empty() && y_pattern.is_empty() {
+
+            //square correctness
+            for x_squares in 0..=2 {
+                for y_squares in 0..=2 {
+                    let mut pattern = pattern.clone();
+                    for x in 0..=2 {
+                        for y in 0..=2 {
+                            let field = &self.field[x_squares * 3 + x][y_squares * 3 + y];
+                            if *field != Field::Empty {
+                                match pattern.remove(field) {
+                                    true => continue,
+                                    false => return SolvingState::Unsolvable,
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //checking if it's full -> solved because it got checked for illegal patterns
+            let mut is_solved = true;
+            for row in self.field {
+                for field in row.iter() {
+                    if *field == Field::Empty {
+                        is_solved = false;
+                    }
+                }
+            }
+            if is_solved {
                 return SolvingState::Solved;
             }
             SolvingState::Solvable
         }
 
-        //using char instead of string would require serios reformatting or endless conversion chains...
+        //using char instead of string would require serious reformatting or endless conversion chains...
         pub fn encode(&self) -> String {
             let mut result: Vec<String> = Vec::new();
             for row in 0..=8 {
@@ -235,6 +259,8 @@ pub mod general {
     }
 
     pub mod stats {
+
+        #[derive(Copy, Clone)]
         pub struct Stats {
             pub won: u32,
             pub lost: u32,
@@ -259,12 +285,14 @@ pub mod general {
 
     pub mod menu {
         use crate::utils::general::get_input;
+        use crate::utils::general::stats::Stats;
 
         //use crate::utils;
-        pub fn general_menu() {
+        pub fn general_menu(stats: Stats) {
+            print!("\x1B[2J\x1B[1;1H");
             println!("-Menu-");
             println!("1. Play Sudoku");
-            println!("2. Settings");
+            println!("2. Settings / Information");
             println!("3. Quit");
             println!("Type the corresponding number and press ENTER to choose an option");
             match get_input().trim().parse::<i32>() {
@@ -272,28 +300,48 @@ pub mod general {
                     //nothing, so it continues with the game
                 }
                 Ok(2) => {
-                    settings::settings_menu();
+                    settings::settings_menu(stats);
                 }
                 //Typing in "3" or anything else means quit
                 _ => {
-                    quit_menu();
+                    quit_menu(stats);
                 }
             }
         }
 
         #[inline]
-        fn quit_menu() {
+        fn quit_menu(stats: Stats) {
+            print!("\x1B[2J\x1B[1;1H");
             println!("Do you want to quit? (y/n)");
             if get_input().trim().to_lowercase() == "y" {
+                print!("\x1B[2J\x1B[1;1H");
+                println!(
+                    "You played {} games ({} lost / {} won)",
+                    stats.won + stats.lost,
+                    stats.won,
+                    stats.lost
+                );
+                match stats.fastest_run {
+                    None => {}
+                    Some(time) => println!(
+                        "Your best run was {}m {}s",
+                        time.as_secs() - (time.as_secs() % 60),
+                        time.as_secs() % 60
+                    ),
+                }
+                println!("");
                 println!("'til the next time! (Press ENTER)");
                 get_input();
+                print!("\x1B[2J\x1B[1;1H");
                 eprintln!("Process got terminated by quitting");
                 std::process::exit(0);
             }
-            general_menu();
+            general_menu(stats);
         }
         pub mod settings {
             use crate::utils::general::get_input;
+            use crate::utils::general::menu::general_menu;
+            use crate::utils::general::stats::Stats;
 
             #[derive(Debug, Default)]
             pub struct Flags {
@@ -313,8 +361,9 @@ pub mod general {
             }
 
             #[inline]
-            pub fn settings_menu() {
-                println!("-Settings-");
+            pub fn settings_menu(stats: Stats) {
+                print!("\x1B[2J\x1B[1;1H");
+                println!("-Settings / Information-");
                 println!(
                     "To apply settings, you can run this exe with some of the following flags:"
                 );
@@ -332,8 +381,29 @@ pub mod general {
                 for flag in get_raw_flags() {
                     println!(" {}", flag);
                 }
+                if get_raw_flags().is_empty() {
+                    println!(" None");
+                }
+                println!("Your current stats are:");
+                println!("{} games played", stats.lost + stats.won);
+                println!("{} loses", stats.lost);
+                println!("{} wins", stats.won);
+                match stats.fastest_run {
+                    None => {
+                        println!("Currently no fastest time.")
+                    }
+                    Some(time) => {
+                        println!(
+                            "Fastest time: {}m {}s",
+                            (time.as_secs() - (time.as_secs() % 60)) / 60,
+                            time.as_secs() % 60
+                        )
+                    }
+                }
+                println!("");
                 println!("Press ENTER to continue");
                 get_input();
+                general_menu(stats)
             }
         }
     }
