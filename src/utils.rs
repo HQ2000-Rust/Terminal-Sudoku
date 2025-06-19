@@ -1,7 +1,30 @@
 pub mod field_utils {
+    use std::cmp::Ordering;
+    use std::collections::HashSet;
     use std::fmt::Display;
 
-    #[derive(PartialEq, Copy, Clone, Ord, PartialOrd, Eq)]
+    pub fn decode(string: &String) -> Option<PlayingField> {
+        let mut result = [[Field::Empty; 9]; 9];
+        for row in 8..=0 {
+            for field in 8..=0 {
+                result[row][field] = match string.chars().nth((row + 1) * 9 + field).unwrap() {
+                    'E' => Field::Empty,
+                    '1' => Field::Number(Number::One),
+                    '2' => Field::Number(Number::Two),
+                    '3' => Field::Number(Number::Three),
+                    '4' => Field::Number(Number::Four),
+                    '5' => Field::Number(Number::Five),
+                    '6' => Field::Number(Number::Six),
+                    '7' => Field::Number(Number::Seven),
+                    '8' => Field::Number(Number::Eight),
+                    '9' => Field::Number(Number::Nine),
+                    _ => return None,
+                }
+            }
+        }
+        None
+    }
+    #[derive(PartialEq, Copy, Clone, Ord, PartialOrd, Eq, Hash, Debug)]
     pub enum Field {
         Empty,
         Number(Number),
@@ -18,7 +41,7 @@ pub mod field_utils {
         }
     }
 
-    #[derive(PartialEq, PartialOrd, Copy, Clone, Ord, Eq, Debug)]
+    #[derive(PartialEq, PartialOrd, Copy, Clone, Ord, Eq, Debug, Hash)]
     pub enum Number {
         One,
         Two,
@@ -70,12 +93,15 @@ pub mod field_utils {
         Solved,
     }
 
+    //prob unused
+
     enum FieldSetResult {
         Success,
         OutOfBounds,
         AlreadySet,
     }
 
+    #[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone)]
     pub struct PlayingField {
         field: [[Field; 9]; 9],
     }
@@ -87,7 +113,7 @@ pub mod field_utils {
             }
         }
 
-        //temporary debug function
+        //temporary debug function (or maybe not?)
         pub fn from(field: [[Field; 9]; 9]) -> Self {
             PlayingField { field }
         }
@@ -138,35 +164,84 @@ pub mod field_utils {
                         }
                     }
                     print!("{sep2}");
-                    print!("{}", ((chunk-1)*3+row));
+                    print!("{}", ((chunk - 1) * 3 + row));
                 }
                 print!("{sep1}");
             }
             println!("   y");
         }
 
-            pub fn solving_state(&self) -> SolvingState {
-                {
-                    use super::field_utils::Field::Number as F;
-                    use super::field_utils::Number as N;
-                    let pattern = [
-                        F(N::One),
-                        F(N::Two),
-                        F(N::Three),
-                        F(N::Four),
-                        F(N::Five),
-                        F(N::Six),
-                        F(N::Seven),
-                        F(N::Eight),
-                        F(N::Nine),
-                    ];
+        pub fn solving_state(&self) -> SolvingState {
+            use super::field_utils::Field::Number as F;
+            use super::field_utils::Number as N;
+            let mut pattern: HashSet<Field> = HashSet::from([
+                F(N::One),
+                F(N::Two),
+                F(N::Three),
+                F(N::Four),
+                F(N::Five),
+                F(N::Six),
+                F(N::Seven),
+                F(N::Eight),
+                F(N::Nine),
+            ]);
+
+            //horizontal correctness
+            let mut y_pattern = pattern.clone();
+            for row_counter in 0..=8 {
+                let mut row = self.field[row_counter].to_vec();
+                for field in row.iter() {
+                    if *field != Field::Empty {
+                        match y_pattern.remove(field) {
+                            true => continue,
+                            false => return SolvingState::Unsolvable,
+                        }
+                    }
                 }
-                for i in 0..9 {}
-                SolvingState::Solvable
+                println!("{:?}", pattern);
             }
+
+            //vertical correctness
+            let mut x_pattern = pattern.clone();
+            for vert_row_counter in 0..=8 {
+                let mut row = Vec::new();
+                for i in 0..=8 {
+                    row.push(self.field[i][vert_row_counter]);
+                }
+                for field in row.iter() {
+                    if *field != Field::Empty {
+                        match x_pattern.remove(field) {
+                            true => continue,
+                            false => return SolvingState::Unsolvable,
+                        }
+                    }
+                }
+            }
+            if x_pattern.is_empty() && y_pattern.is_empty() {
+                return SolvingState::Solved;
+            }
+            SolvingState::Solvable
+        }
+
+        //using char instead of string would require serios reformatting or endless conversion chains...
+        pub fn encode(&self) -> String {
+            let mut result: Vec<String> = Vec::new();
+            for row in 0..=8 {
+                for field in 0..=8 {
+                    match self.field[row][field] {
+                        Field::Empty => {
+                            result.push("E".to_string());
+                        }
+                        Field::Number(n) => {
+                            result.push(n.to_string());
+                        }
+                    }
+                }
+            }
+            result.join("")
         }
     }
-
+}
 
 pub mod general {
     pub fn get_input() -> String {
@@ -176,7 +251,7 @@ pub mod general {
             .expect("I/O needs to work in order to play this game!");
         input
     }
-    
+
     pub mod stats {
         pub struct Stats {
             pub won: u32,
@@ -186,16 +261,16 @@ pub mod general {
         impl Stats {
             pub fn new() -> Stats {
                 Stats {
-                    won:0,
-                    lost:0,
+                    won: 0,
+                    lost: 0,
                     fastest_run: None,
                 }
             }
             pub fn add_lost(&mut self) {
-            self.lost+= 1;
+                self.lost += 1;
             }
             pub fn add_won(&mut self) {
-            self.won+=1;
+                self.won += 1;
             }
         }
     }
@@ -265,14 +340,15 @@ pub mod general {
                     " --stopwatch -> enables a stopwatch that tracks how long you need to solve the Sudoku"
                 );
                 println!(
-                    " --sudoku-maker -> asks you to save your field after every turn as a string you can later use as a template"
+                    " --sudoku_maker -> asks you to save your field after every turn as a string you can later use as a template"
                 );
                 println!(
                     " --template -> asks you to use a template you obtained with --sudoku-maker before every round, you can also select a standard template (e.g. an empty field, which you normally can't obtain)"
                 );
+                println!("All other flags are ignored");
                 println!("The active flags are:");
                 for flag in get_raw_flags() {
-                    println!(" --{}", flag);
+                    println!(" {}", flag);
                 }
                 println!("Press ENTER to continue");
                 get_input();
