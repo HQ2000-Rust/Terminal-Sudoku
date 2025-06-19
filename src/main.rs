@@ -1,9 +1,10 @@
-use crate::utils::field_utils::{decode, Field, Number, PlayingField};
+use crate::utils::field_utils::{Field, Number, decode};
 use crate::utils::general::get_input;
 use crate::utils::general::menu::settings::Flags;
 
 mod playing_field_templates;
 mod utils;
+#[allow(unused_labels)]
 
 fn main() {
     println!("Welcome to Terminal Sudoku!");
@@ -22,9 +23,12 @@ fn game_loop(settings: Flags) {
     let mut stats = crate::utils::general::stats::Stats::new();
     'round: loop {
         utils::general::menu::general_menu();
+        //replace PlayingField::new() with crate::playing_field_templates::get_template([number assigned to the wanted pattern])
+        //to use your own standard templates
         let mut playing_field = PlayingField::new();
-        //timer!
+        //saved regardless of the flags to prevent compiler warnings about possibly uninitialized values
         let start = std::time::Instant::now();
+        //loop labels: here to make orientation easier, they aren't needed (mostly)
         'turn: loop {
             println!("The field:");
             playing_field.print();
@@ -107,7 +111,7 @@ fn game_loop(settings: Flags) {
                                     }
                                 }
                                 Some(field) => {
-                                    playing_field=field;
+                                    playing_field = field;
                                     println!("Applied template!");
                                 }
                             }
@@ -117,9 +121,10 @@ fn game_loop(settings: Flags) {
                 }
             }
             if settings.sudoku_maker {
-                println!("inside-if-maker");
                 'save: loop {
-                    println!("Do you want to save this state? Type in the corresponding number and press ENTER.");
+                    println!(
+                        "Do you want to save this state? Type in the corresponding number and press ENTER."
+                    );
                     println!("1. yes");
                     println!("2. no");
                     match get_input().trim().parse::<i32>() {
@@ -147,6 +152,7 @@ fn game_loop(settings: Flags) {
                 SolvingState::Solvable => {}
                 SolvingState::Unsolvable => {
                     stats.add_lost();
+                    playing_field.print();
                     println!("It's unsolvable now! (Press ENTER)");
                     get_input();
                     break 'turn;
