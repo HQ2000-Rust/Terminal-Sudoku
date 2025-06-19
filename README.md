@@ -8,7 +8,7 @@
 ####    -sudoku_maker: Save your game in a string
 ####    -templates: use a saved game ("state code") to apply it to the current game. It's possible to use your own pre-made template (but not really recommended)
 ### -Stats, so you can keep track of your victories (and failures) each session
-### -Nice user interface (always a "clean screen" after each step
+### -Nice user interface (always a "clean screen" after each step)
 ### -Written in Rust, so it's pretty performant and lightweight (~1.25mb with the --release flag) and, if anyone wants that (I would wonder), it's pretty memory safe too!
 
 ### (Took me 18h...)
