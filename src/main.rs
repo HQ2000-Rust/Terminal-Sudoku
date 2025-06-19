@@ -1,4 +1,4 @@
-use crate::utils::field_utils::{Field, Number, PlayingField};
+use crate::utils::field_utils::{decode, Field, Number, PlayingField};
 use crate::utils::general::get_input;
 use crate::utils::general::menu::settings::Flags;
 
@@ -19,11 +19,12 @@ fn main() {
 #[inline]
 fn game_loop(settings: Flags) {
     use utils::field_utils::{Field, PlayingField};
-    let mut stats=crate::utils::general::stats::Stats::new();
+    let mut stats = crate::utils::general::stats::Stats::new();
     'round: loop {
         utils::general::menu::general_menu();
         let mut playing_field = PlayingField::new();
-        //TODO!: timer
+        //timer!
+        let start = std::time::Instant::now();
         'turn: loop {
             println!("The field:");
             playing_field.print();
@@ -81,29 +82,103 @@ fn game_loop(settings: Flags) {
             playing_field.set(
                 x_coord,
                 y_coord,
-                Field::Number(
-                    {
-                        crate::utils::field_utils::i32_to_Number(&field_type_i32).expect("already bound and type checked, so this should be impossible")
-                    }
-                ),
+                Field::Number({
+                    crate::utils::field_utils::i32_to_Number(&field_type_i32)
+                        .expect("already bound and type checked, so this should be impossible")
+                }),
             );
+            println!("before if-maker");
+            if settings.templates {
+                'template: loop {
+                    println!("Do you want to apply a template? (y/n)");
+                    match get_input().trim() {
+                        "y" => {
+                            println!("Please input a saved state code and press ENTER to apply it");
+                            match decode(&get_input().trim().to_string()) {
+                                None => {
+                                    println!("Incorrect state code!");
+                                    println!("Do you want to apply another state code? (y/n)");
+                                    match get_input().trim() {
+                                        "y" => {
+                                            println!("Ok, so");
+                                            continue 'template;
+                                        }
+                                        _ => break 'template,
+                                    }
+                                }
+                                Some(field) => {
+                                    playing_field=field;
+                                    println!("Applied template!");
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            if settings.sudoku_maker {
+                println!("inside-if-maker");
+                'save: loop {
+                    println!("Do you want to save this state? Type in the corresponding number and press ENTER.");
+                    println!("1. yes");
+                    println!("2. no");
+                    match get_input().trim().parse::<i32>() {
+                        Ok(1) => {
+                            println!("Nice! Here is your code to copy:");
+                            println!("{}", playing_field.encode());
+                            println!("(Press ENTER to continue with the game)");
+                        }
+                        _ => {
+                            println!("Are you sure you don't want to get a code? (y/n)");
+                            match get_input().trim() {
+                                "n" => {
+                                    println!("Ok, so");
+                                }
+                                _ => {
+                                    println!("Fine. Good luck and have fun!")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             use crate::utils::field_utils::SolvingState;
             match playing_field.solving_state() {
-                SolvingState::Solvable=>{},
-                SolvingState::Unsolvable=>{
+                SolvingState::Solvable => {}
+                SolvingState::Unsolvable => {
                     stats.add_lost();
                     println!("It's unsolvable now! (Press ENTER)");
                     get_input();
-                    break 'round;
-               },
-                SolvingState::Solved=>{
+                    break 'turn;
+                }
+                SolvingState::Solved => {
                     stats.add_won();
+                    if settings.stopwatch {
+                        println!(
+                            "You needed {}m and {}s!",
+                            start.elapsed().as_secs() - (start.elapsed().as_secs() % 60),
+                            start.elapsed().as_secs() % 60
+                        );
+                    }
+
+                    if stats.fastest_run == None {
+                        stats.fastest_run = Some(start.elapsed());
+                        println!("That's your first and fastest run! (With stopwatch enabled)")
+                    } else {
+                        if start.elapsed()
+                            > stats
+                                .fastest_run
+                                .expect("Impossible to reach (at least logically)")
+                        {
+                            stats.fastest_run = Some(start.elapsed());
+                            println!("That's a new best!");
+                        }
+                    }
                     println!("Solved! (Press ENTER)");
                     get_input();
-                    break 'round;
+                    break 'turn;
                 }
             }
-            
         }
     }
 }
