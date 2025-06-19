@@ -54,8 +54,8 @@ pub mod field_utils {
         Nine,
     }
 
+    //done here to show that it's a conversion from a i32 to a Number enum variant, "number_to_number" would be unclear
     pub fn i32_to_Number(value: &i32) -> Option<Number> {
-        println!("Number2: {value}");
         match value {
             1 => Some(Number::One),
             2 => Some(Number::Two),
@@ -95,11 +95,7 @@ pub mod field_utils {
 
     //prob unused
 
-    enum FieldSetResult {
-        Success,
-        OutOfBounds,
-        AlreadySet,
-    }
+
 
     #[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone)]
     pub struct PlayingField {
@@ -113,7 +109,7 @@ pub mod field_utils {
             }
         }
 
-        //temporary debug function (or maybe not?)
+        //used for templates
         pub fn from(field: [[Field; 9]; 9]) -> Self {
             PlayingField { field }
         }
@@ -127,19 +123,6 @@ pub mod field_utils {
         //same rules as for PlayingField::access ^^^^^
         pub fn set(&mut self, x_coord: usize, y_coord: usize, field: Field) {
             self.field[x_coord - 1][y_coord - 1] = field;
-        }
-
-        //returns false when this operation is not possible, x-/y-coords are *NOT* 0-indexed (likely unused)
-        fn set_checked(&mut self, x_coord: usize, y_coord: usize, field: &Field) -> FieldSetResult {
-            if x_coord <= 9 && y_coord <= 9 {
-                let mut target_field = self.access(x_coord, y_coord);
-                if *target_field == Field::Empty {
-                    self.set(x_coord, y_coord, Field::Empty);
-                    return FieldSetResult::Success;
-                }
-                return FieldSetResult::AlreadySet;
-            }
-            FieldSetResult::OutOfBounds
         }
 
         pub fn print(&self) {
@@ -174,7 +157,7 @@ pub mod field_utils {
         pub fn solving_state(&self) -> SolvingState {
             use super::field_utils::Field::Number as F;
             use super::field_utils::Number as N;
-            let mut pattern: HashSet<Field> = HashSet::from([
+            let pattern: HashSet<Field> = HashSet::from([
                 F(N::One),
                 F(N::Two),
                 F(N::Three),
@@ -189,7 +172,7 @@ pub mod field_utils {
             //horizontal correctness
             let mut y_pattern = pattern.clone();
             for row_counter in 0..=8 {
-                let mut row = self.field[row_counter].to_vec();
+                let row = self.field[row_counter].to_vec();
                 for field in row.iter() {
                     if *field != Field::Empty {
                         match y_pattern.remove(field) {
@@ -198,7 +181,6 @@ pub mod field_utils {
                         }
                     }
                 }
-                println!("{:?}", pattern);
             }
 
             //vertical correctness
