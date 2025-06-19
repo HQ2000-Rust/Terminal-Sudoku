@@ -318,8 +318,8 @@ pub mod general {
                 println!(
                     "You played {} games ({} lost / {} won)",
                     stats.won + stats.lost,
-                    stats.won,
-                    stats.lost
+                    stats.lost,
+                    stats.won
                 );
                 match stats.fastest_run {
                     None => {}
@@ -374,7 +374,7 @@ pub mod general {
                     " --sudoku_maker -> asks you to save your field after every turn as a string you can later use as a template"
                 );
                 println!(
-                    " --template -> asks you to use a template you obtained with --sudoku-maker before every round, you can also select a standard template (e.g. an empty field, which you normally can't obtain)"
+                    " --template -> asks you to use a template you obtained with --sudoku_maker before every round, you can also select a standard template (e.g. an empty field, which you normally can't obtain)"
                 );
                 println!("All other flags are ignored");
                 println!("The active flags are:");
