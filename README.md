@@ -13,3 +13,5 @@
 ### -Written in Rust, so it's pretty performant and lightweight (~1.25mb with the --release flag) and, if anyone wants that (I would wonder), it's pretty memory safe too!
 
 ### (Took me 18h...)
+
+### [Rust Playground Link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=e2c0c20617d25444381b442eb1386cfb)
