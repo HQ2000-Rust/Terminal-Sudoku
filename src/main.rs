@@ -46,9 +46,7 @@ fn game_loop(settings: Flags) {
                         "?".to_string()
                     }
                 });
-                println!(
-                    "Which field do you want to change?"
-                );
+                println!("Which field do you want to change?");
                 println!("Input the {}-coordinate and press ENTER:", {
                     if y_coord_switch { "y" } else { "x" }
                 });
@@ -64,10 +62,19 @@ fn game_loop(settings: Flags) {
                         }
                         match y_coord_switch {
                             true => {
-                                y_coord = number;
+                                if playing_field.y_has_empty(number) {
+                                    y_coord = number;
+                                }
+                                else {
+                                    println!("That y coordinate has no empty spaces! (Press ENTER)");
+                                    get_input();
+                                    y_coord_switch = true;
+                                    continue 'coords;
+                                }
                             }
                             false => {
                                 x_coord = number;
+                        
                             }
                         }
                         if !y_coord_switch {
@@ -105,7 +112,7 @@ fn game_loop(settings: Flags) {
                 x_coord,
                 y_coord,
                 Field::Number({
-                    crate::utils::field_utils::i32_to_Number(&field_type_i32)
+                    crate::utils::field_utils::i32_to_number(&field_type_i32)
                         .expect("already bound and type checked, so this should be impossible")
                 }),
             );
