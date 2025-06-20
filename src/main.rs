@@ -23,14 +23,14 @@ fn game_loop(settings: Flags) {
     let mut stats = crate::utils::general::stats::Stats::new();
     'round: loop {
         utils::general::menu::general_menu(stats.clone());
-        //replace PlayingField::new() with crate::playing_field_templates::get_template([number assigned to the wanted pattern])
-        //to use your own standard templates
-        //use the line under this one to get the empty field
-        //let mut playing_field = PlayingField::new();
+        /* replace PlayingField::new() with crate::playing_field_templates::get_template([number assigned to the wanted pattern])
+        to use your own standard templates
+        use the line under this one to get the empty field
+        let mut playing_field = PlayingField::new(); */
         let mut playing_field = playing_field_templates::get_template(rand::random_range(1..=5));
-        //saved regardless of the flags to prevent compiler warnings about possibly uninitialized values
+        // saved regardless of the flags to prevent compiler warnings about possibly uninitialized values
         let start = std::time::Instant::now();
-        //loop labels: here to make orientation easier, they aren't needed (mostly)
+        // loop labels: here to make orientation easier, they aren't needed (mostly)
         'turn: loop {
             let mut y_coord_switch = true;
             let mut x_coord: usize = 0;
@@ -38,7 +38,7 @@ fn game_loop(settings: Flags) {
             'coords: loop {
                 print!("\x1B[2J\x1B[1;1H");
                 playing_field.print();
-                println!("");
+                println!();
                 println!("(y: {}, x: ?)",{
                     if y_coord != 0 {
                         y_coord.to_string()
@@ -89,7 +89,7 @@ fn game_loop(settings: Flags) {
             let field_type_i32 = loop {
                 print!("\x1B[2J\x1B[1;1H");
                 playing_field.print();
-                println!("");
+                println!();
                 println!("(y: {}, x: {})",y_coord, x_coord);
                 println!(
                     "Which number should be inserted? Type it in and press ENTER."
