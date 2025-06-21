@@ -14,4 +14,5 @@
 
 ### (Took me 18h...)
 
-### [Rust Playground Link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=e2c0c20617d25444381b442eb1386cfb)
+### 1. [Rust Playground Link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=e2c0c20617d25444381b442eb1386cfb)
+### 2. cargo install TerminalSudoku
