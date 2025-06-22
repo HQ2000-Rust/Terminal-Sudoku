@@ -1,6 +1,7 @@
 # Terminal-Sudoku
 # A simple Sudoku game running in a terminal for the Hackclubs' Summer Of Making 2025
-> LOC: 662
+> - [SoM link](https://summer.hackclub.com/projects/1074)
+> - LOC: 662
 ## Features:
 - Playing Sudoku in the Terminal
 - Detecting when you've messed it up (you only have 1 try!)
@@ -13,6 +14,5 @@
 - Written in Rust, so it's pretty performant and lightweight (~1.25mb with the --release flag) and, if anyone wants that (I would wonder), it's pretty memory safe too!
 
 ## How to install
-- [SoM link](https://summer.hackclub.com/projects/1074)
 - [Rust Playground Link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=e2c0c20617d25444381b442eb1386cfb)
 - `cargo install TerminalSudoku` if you have Rust installed
