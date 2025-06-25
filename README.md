@@ -1,3 +1,4 @@
+![](crates.io/crates/terminalsudoku)
 # Terminal-Sudoku
 # A simple Sudoku game running in a terminal for the Hackclubs' Summer Of Making 2025
 > - [SoM link](https://summer.hackclub.com/projects/1074)
