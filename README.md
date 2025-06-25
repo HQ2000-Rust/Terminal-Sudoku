@@ -16,4 +16,4 @@
 ## How to install
 - [Rust Playground Link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=e2c0c20617d25444381b442eb1386cfb)
 - `cargo install TerminalSudoku` if you have Rust installed
-- [crates.io](https://crates.io/cratesterminalsudoku)
+- [crates.io](https://crates.io/crates/terminalsudoku)
