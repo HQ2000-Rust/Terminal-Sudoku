@@ -1,4 +1,3 @@
-![hi](crates.io/crates/terminalsudoku)
 # Terminal-Sudoku
 # A simple Sudoku game running in a terminal for the Hackclubs' Summer Of Making 2025
 > - [SoM link](https://summer.hackclub.com/projects/1074)
@@ -17,3 +16,4 @@
 ## How to install
 - [Rust Playground Link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=e2c0c20617d25444381b442eb1386cfb)
 - `cargo install TerminalSudoku` if you have Rust installed
+- [crates.io](crates.io/cratesterminalsudoku)
