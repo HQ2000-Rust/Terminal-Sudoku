@@ -55,8 +55,8 @@ pub mod field_utils {
         Nine,
     }
 
-    //done here to show that it's a conversion from an i32 to a Number enum variant, "number_to_number" would be unclear
-    pub fn i32_to_Number(value: &i32) -> Option<Number> {
+    //  done here to show that it's a conversion from an i32 to a Number enum variant, "number_to_number" would be unclear
+    pub fn i32_to_number(value: &i32) -> Option<Number> {
         match value {
             1 => Some(Number::One),
             2 => Some(Number::Two),
@@ -107,20 +107,37 @@ pub mod field_utils {
             }
         }
 
-        //used for templates
+        // used for templates
         pub fn from(field: [[Field; 9]; 9]) -> Self {
             PlayingField { field }
         }
 
-        //does panic on operation out of bounds!
-        //1-indexed!
+        // does panic on operation out of bounds!
+        // 1-indexed!
         pub fn access(&self, x_coord: usize, y_coord: usize) -> &Field {
             &self.field[x_coord - 1][y_coord - 1]
         }
 
-        //same rules as for PlayingField::access ^^^^^
+        // same rules as for PlayingField::access ^^^^^
         pub fn set(&mut self, x_coord: usize, y_coord: usize, field: Field) {
             self.field[x_coord - 1][y_coord - 1] = field;
+        }
+        
+        // functions to check if the y or x coordinate has an empty space
+        pub fn y_contains_empty(&self, y_coord:usize) -> bool {
+            let mut x_coord: usize = 1;
+            loop {
+                if x_coord < 10 {
+                    let field = self.access(x_coord, y_coord);
+                    if field.eq(&Field::Empty) {
+                        return true
+                    }
+                    x_coord += 1;
+                }
+                else {
+                    return false
+                }
+            }
         }
 
         pub fn print(&self) {
@@ -128,15 +145,15 @@ pub mod field_utils {
             let sep2 = " |  ";
             print!("x   1 2 3     4 5 6     7 8 9");
             print!("{sep1}");
-            //chunk = 3 horizontal rows
+            // chunk = 3 horizontal rows
             for chunk in 1..=3 {
-                //row = horizontal row
+                // row = horizontal row
                 for row in 1..=3 {
                     println!();
-                    //frac1=third part of a horiz. row
+                    // frac1=third part of a horiz. row
                     for frac1 in 1..=3 {
                         print!("{sep2}");
-                        //field = field
+                        // field = field
                         for field in 1..=3 {
                             print!(
                                 "{} ",
@@ -166,7 +183,7 @@ pub mod field_utils {
                 F(N::Eight),
                 F(N::Nine),
             ]);
-            //horizontal correctness
+            // horizontal correctness
             for row_counter in 0..=8 {
                 let mut y_pattern = pattern.clone();
                 let row = self.field[row_counter].to_vec();
@@ -180,7 +197,7 @@ pub mod field_utils {
                 }
             }
 
-            //vertical correctness
+            // vertical correctness
             for vert_row in 0..=8 {
                 let mut row = Vec::new();
                 for i in 0..=8 {
@@ -197,7 +214,7 @@ pub mod field_utils {
                 }
             }
 
-            //square correctness
+            // square correctness
             for x_squares in 0..=2 {
                 for y_squares in 0..=2 {
                     let mut pattern = pattern.clone();
@@ -214,7 +231,7 @@ pub mod field_utils {
                     }
                 }
             }
-            //checking if it's full -> solved because it got checked for illegal patterns
+            //  checking if it's full -> solved because it got checked for illegal patterns
             let mut is_solved = true;
             for row in self.field {
                 for field in row.iter() {
@@ -229,7 +246,7 @@ pub mod field_utils {
             SolvingState::Solvable
         }
 
-        //using char instead of string would require serious reformatting or endless conversion chains...
+        // using char instead of string would require serious reformatting or endless conversion chains...
         pub fn encode(&self) -> String {
             let mut result: Vec<String> = Vec::new();
             for row in 0..=8 {
@@ -287,7 +304,7 @@ pub mod general {
         use crate::utils::general::get_input;
         use crate::utils::general::stats::Stats;
 
-        //use crate::utils;
+        // use crate::utils;
         pub fn general_menu(stats: Stats) {
             print!("\x1B[2J\x1B[1;1H");
             println!("-Menu-");
@@ -297,12 +314,12 @@ pub mod general {
             println!("Type the corresponding number and press ENTER to choose an option");
             match get_input().trim().parse::<i32>() {
                 Ok(1) => {
-                    //nothing, so it continues with the game
+                    // nothing, so it continues with the game
                 }
                 Ok(2) => {
                     settings::settings_menu(stats);
                 }
-                //Typing in "3" or anything else means quit
+                // Typing in "3" or anything else means quit
                 _ => {
                     quit_menu(stats);
                 }
@@ -329,7 +346,7 @@ pub mod general {
                         time.as_secs() % 60
                     ),
                 }
-                println!("");
+                println!();
                 println!("'til the next time! (Press ENTER)");
                 get_input();
                 print!("\x1B[2J\x1B[1;1H");
@@ -400,7 +417,7 @@ pub mod general {
                         )
                     }
                 }
-                println!("");
+                println!();
                 println!("Press ENTER to continue");
                 get_input();
                 general_menu(stats)
