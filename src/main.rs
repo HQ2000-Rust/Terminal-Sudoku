@@ -62,7 +62,7 @@ fn game_loop(settings: Flags) {
                         }
                         match y_coord_switch {
                             true => {
-                                if playing_field.y_has_empty(number) {
+                                if playing_field.y_contains_empty(number) {
                                     y_coord = number;
                                 }
                                 else {

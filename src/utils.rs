@@ -124,7 +124,7 @@ pub mod field_utils {
         }
         
         // functions to check if the y or x coordinate has an empty space
-        pub fn y_has_empty(&self, y_coord:usize) -> bool {
+        pub fn y_contains_empty(&self, y_coord:usize) -> bool {
             let mut x_coord: usize = 1;
             loop {
                 if x_coord < 10 {
