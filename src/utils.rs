@@ -101,11 +101,6 @@ pub mod field_utils {
     }
 
     impl PlayingField {
-        pub fn new() -> Self {
-            PlayingField {
-                field: [[Field::Empty; 9]; 9],
-            }
-        }
 
         //used for templates
         pub fn from(field: [[Field; 9]; 9]) -> Self {
@@ -162,7 +157,7 @@ pub mod field_utils {
                         }
                     }
                     print!("{sep2}");
-                    print!("{}", ((chunk - 1) * 3 + row));
+                    print!("{}", (chunk - 1) * 3 + row);
                 }
                 print!("{sep1}");
             }
@@ -346,7 +341,7 @@ pub mod general {
                         time.as_secs() % 60
                     ),
                 }
-                println!("");
+                println!();
                 println!("'til the next time! (Press ENTER)");
                 get_input();
                 print!("\x1B[2J\x1B[1;1H");
@@ -417,7 +412,7 @@ pub mod general {
                         )
                     }
                 }
-                println!("");
+                println!();
                 println!("Press ENTER to continue");
                 get_input();
                 general_menu(stats)
