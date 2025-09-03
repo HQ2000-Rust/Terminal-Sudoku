@@ -64,7 +64,15 @@ fn game_loop(settings: Flags) {
                         }
                         match y_coord_switch {
                             true => {
-                                y_coord = number;
+                                if playing_field.y_contains_empty(number) {
+                                    y_coord = number;
+                                }
+                                else {
+                                    println!("That y coordinate has no empty spaces! (Press ENTER)");
+                                    get_input();
+                                    y_coord_switch = true;
+                                    continue 'coords;
+                                }
                             }
                             false => {
                                 x_coord = number;

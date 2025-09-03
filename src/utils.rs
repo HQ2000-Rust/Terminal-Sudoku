@@ -123,6 +123,23 @@ pub mod field_utils {
             self.field[x_coord - 1][y_coord - 1] = field;
         }
 
+        // functions to check if the y or x coordinate has an empty space
+        pub fn y_contains_empty(&self, y_coord:usize) -> bool {
+            let mut x_coord: usize = 1;
+            loop {
+                if x_coord < 10 {
+                    let field = self.access(x_coord, y_coord);
+                    if field.eq(&Field::Empty) {
+                        return true
+                    }
+                    x_coord += 1;
+                }
+                else {
+                    return false
+                }
+            }
+        }
+
         pub fn print(&self) {
             let sep1 = "\n  -- -- -- -- -- -- -- -- -- --";
             let sep2 = " |  ";
