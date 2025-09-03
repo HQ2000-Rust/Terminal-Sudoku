@@ -1,4 +1,4 @@
-use crate::utils::field_utils::{Field, Number, PlayingField, decode};
+use crate::utils::field_utils::{Field, Number, decode};
 use crate::utils::general::get_input;
 use crate::utils::general::menu::settings::Flags;
 
@@ -9,7 +9,7 @@ mod utils;
 fn main() {
     print!("\x1B[2J\x1B[1;1H");
     println!("Welcome to Terminal Sudoku!");
-    let settings = crate::utils::general::menu::settings::get_raw_flags();
+    let settings = utils::general::menu::settings::get_raw_flags();
     let settings = Flags {
         stopwatch: settings.contains(&("stopwatch".to_string())),
         sudoku_maker: settings.contains(&("sudoku_maker".to_string())),
@@ -19,9 +19,9 @@ fn main() {
 }
 #[inline]
 fn game_loop(settings: Flags) {
-    use utils::field_utils::{Field, PlayingField};
-    let mut stats = crate::utils::general::stats::Stats::new();
-    'round: loop {
+    use utils::field_utils::{Field};
+    let mut stats = utils::general::stats::Stats::new();
+    loop {
         utils::general::menu::general_menu(stats.clone());
         //replace PlayingField::new() with crate::playing_field_templates::get_template([number assigned to the wanted pattern])
         //to use your own standard templates
@@ -38,7 +38,7 @@ fn game_loop(settings: Flags) {
             'coords: loop {
                 print!("\x1B[2J\x1B[1;1H");
                 playing_field.print();
-                println!("");
+                println!();
                 println!("(y: {}, x: ?)",{
                     if y_coord != 0 {
                         y_coord.to_string()
@@ -89,7 +89,7 @@ fn game_loop(settings: Flags) {
             let field_type_i32 = loop {
                 print!("\x1B[2J\x1B[1;1H");
                 playing_field.print();
-                println!("");
+                println!();
                 println!("(y: {}, x: {})",y_coord, x_coord);
                 println!(
                     "Which number should be inserted? Type it in and press ENTER."
@@ -105,7 +105,7 @@ fn game_loop(settings: Flags) {
                 x_coord,
                 y_coord,
                 Field::Number({
-                    crate::utils::field_utils::i32_to_Number(&field_type_i32)
+                    utils::field_utils::i32_to_Number(&field_type_i32)
                         .expect("already bound and type checked, so this should be impossible")
                 }),
             );
