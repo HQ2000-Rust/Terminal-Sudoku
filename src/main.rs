@@ -1,4 +1,4 @@
-use crate::utils::field_utils::{Field, Number, PlayingField, decode};
+use crate::utils::field_utils::{Field, Number, decode};
 use crate::utils::general::get_input;
 use crate::utils::general::menu::settings::Flags;
 
@@ -9,7 +9,7 @@ mod utils;
 fn main() {
     print!("\x1B[2J\x1B[1;1H");
     println!("Welcome to Terminal Sudoku!");
-    let settings = crate::utils::general::menu::settings::get_raw_flags();
+    let settings = utils::general::menu::settings::get_raw_flags();
     let settings = Flags {
         stopwatch: settings.contains(&("stopwatch".to_string())),
         sudoku_maker: settings.contains(&("sudoku_maker".to_string())),
@@ -19,14 +19,16 @@ fn main() {
 }
 #[inline]
 fn game_loop(settings: Flags) {
-    use utils::field_utils::{Field, PlayingField};
-    let mut stats = crate::utils::general::stats::Stats::new();
-    'round: loop {
+    use utils::field_utils::Field;
+    let mut stats = utils::general::stats::Stats::new();
+    loop {
         utils::general::menu::general_menu(stats.clone());
-        //replace PlayingField::new() with crate::playing_field_templates::get_template([number assigned to the wanted pattern])
-        //to use your own standard templates
-        //use the line under this one to get the empty field
-        //let mut playing_field = PlayingField::new();
+        /*
+        replace PlayingField::new() with crate::playing_field_templates::get_template([number assigned to the wanted pattern])
+        to use your own standard templates
+        use the line under this one to get the empty field
+        let mut playing_field = PlayingField::new();
+        */
         let mut playing_field = playing_field_templates::get_template(rand::random_range(1..=5));
         //saved regardless of the flags to prevent compiler warnings about possibly uninitialized values
         let start = std::time::Instant::now();
@@ -38,17 +40,15 @@ fn game_loop(settings: Flags) {
             'coords: loop {
                 print!("\x1B[2J\x1B[1;1H");
                 playing_field.print();
-                println!("");
-                println!("(y: {}, x: ?)",{
+                println!();
+                println!("(y: {}, x: ?)", {
                     if y_coord != 0 {
                         y_coord.to_string()
                     } else {
                         "?".to_string()
                     }
                 });
-                println!(
-                    "Which field do you want to change?"
-                );
+                println!("Which field do you want to change?");
                 println!("Input the {}-coordinate and press ENTER:", {
                     if y_coord_switch { "y" } else { "x" }
                 });
@@ -64,7 +64,16 @@ fn game_loop(settings: Flags) {
                         }
                         match y_coord_switch {
                             true => {
-                                y_coord = number;
+                                if playing_field.y_contains_empty(number) {
+                                    y_coord = number;
+                                } else {
+                                    println!(
+                                        "That y coordinate has no empty spaces! (Press ENTER)"
+                                    );
+                                    get_input();
+                                    y_coord_switch = true;
+                                    continue 'coords;
+                                }
                             }
                             false => {
                                 x_coord = number;
@@ -89,11 +98,9 @@ fn game_loop(settings: Flags) {
             let field_type_i32 = loop {
                 print!("\x1B[2J\x1B[1;1H");
                 playing_field.print();
-                println!("");
-                println!("(y: {}, x: {})",y_coord, x_coord);
-                println!(
-                    "Which number should be inserted? Type it in and press ENTER."
-                );
+                println!();
+                println!("(y: {}, x: {})", y_coord, x_coord);
+                println!("Which number should be inserted? Type it in and press ENTER.");
                 if let Ok(number) = get_input().trim().parse::<i32>() {
                     if number >= 1 && number <= 9 {
                         break number;
@@ -105,7 +112,7 @@ fn game_loop(settings: Flags) {
                 x_coord,
                 y_coord,
                 Field::Number({
-                    crate::utils::field_utils::i32_to_Number(&field_type_i32)
+                    utils::field_utils::i32_to_number(&field_type_i32)
                         .expect("already bound and type checked, so this should be impossible")
                 }),
             );
