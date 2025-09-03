@@ -23,10 +23,12 @@ fn game_loop(settings: Flags) {
     let mut stats = utils::general::stats::Stats::new();
     loop {
         utils::general::menu::general_menu(stats.clone());
-        //replace PlayingField::new() with crate::playing_field_templates::get_template([number assigned to the wanted pattern])
-        //to use your own standard templates
-        //use the line under this one to get the empty field
-        //let mut playing_field = PlayingField::new();
+        /*
+        replace PlayingField::new() with crate::playing_field_templates::get_template([number assigned to the wanted pattern])
+        to use your own standard templates
+        use the line under this one to get the empty field
+        let mut playing_field = PlayingField::new();
+        */
         let mut playing_field = playing_field_templates::get_template(rand::random_range(1..=5));
         //saved regardless of the flags to prevent compiler warnings about possibly uninitialized values
         let start = std::time::Instant::now();
