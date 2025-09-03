@@ -19,7 +19,7 @@ fn main() {
 }
 #[inline]
 fn game_loop(settings: Flags) {
-    use utils::field_utils::{Field};
+    use utils::field_utils::Field;
     let mut stats = utils::general::stats::Stats::new();
     loop {
         utils::general::menu::general_menu(stats.clone());
@@ -39,16 +39,14 @@ fn game_loop(settings: Flags) {
                 print!("\x1B[2J\x1B[1;1H");
                 playing_field.print();
                 println!();
-                println!("(y: {}, x: ?)",{
+                println!("(y: {}, x: ?)", {
                     if y_coord != 0 {
                         y_coord.to_string()
                     } else {
                         "?".to_string()
                     }
                 });
-                println!(
-                    "Which field do you want to change?"
-                );
+                println!("Which field do you want to change?");
                 println!("Input the {}-coordinate and press ENTER:", {
                     if y_coord_switch { "y" } else { "x" }
                 });
@@ -90,10 +88,8 @@ fn game_loop(settings: Flags) {
                 print!("\x1B[2J\x1B[1;1H");
                 playing_field.print();
                 println!();
-                println!("(y: {}, x: {})",y_coord, x_coord);
-                println!(
-                    "Which number should be inserted? Type it in and press ENTER."
-                );
+                println!("(y: {}, x: {})", y_coord, x_coord);
+                println!("Which number should be inserted? Type it in and press ENTER.");
                 if let Ok(number) = get_input().trim().parse::<i32>() {
                     if number >= 1 && number <= 9 {
                         break number;
