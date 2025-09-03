@@ -103,7 +103,7 @@ fn game_loop(settings: Flags) {
                 x_coord,
                 y_coord,
                 Field::Number({
-                    utils::field_utils::i32_to_Number(&field_type_i32)
+                    utils::field_utils::i32_to_number(&field_type_i32)
                         .expect("already bound and type checked, so this should be impossible")
                 }),
             );

@@ -56,7 +56,7 @@ pub mod field_utils {
     }
 
     //done here to show that it's a conversion from an i32 to a Number enum variant, "number_to_number" would be unclear
-    pub fn i32_to_Number(value: &i32) -> Option<Number> {
+    pub fn i32_to_number(value: &i32) -> Option<Number> {
         match value {
             1 => Some(Number::One),
             2 => Some(Number::Two),
