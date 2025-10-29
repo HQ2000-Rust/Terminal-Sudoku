@@ -56,7 +56,7 @@ pub mod field_utils {
     }
 
     //done here to show that it's a conversion from an i32 to a Number enum variant, "number_to_number" would be unclear
-    pub fn i32_to_Number(value: &i32) -> Option<Number> {
+    pub fn i32_to_number(value: &i32) -> Option<Number> {
         match value {
             1 => Some(Number::One),
             2 => Some(Number::Two),
@@ -101,12 +101,6 @@ pub mod field_utils {
     }
 
     impl PlayingField {
-        pub fn new() -> Self {
-            PlayingField {
-                field: [[Field::Empty; 9]; 9],
-            }
-        }
-
         //used for templates
         pub fn from(field: [[Field; 9]; 9]) -> Self {
             PlayingField { field }
@@ -121,6 +115,22 @@ pub mod field_utils {
         //same rules as for PlayingField::access ^^^^^
         pub fn set(&mut self, x_coord: usize, y_coord: usize, field: Field) {
             self.field[x_coord - 1][y_coord - 1] = field;
+        }
+
+        // functions to check if the y or x coordinate has an empty space
+        pub fn y_contains_empty(&self, y_coord: usize) -> bool {
+            let mut x_coord: usize = 1;
+            loop {
+                if x_coord < 10 {
+                    let field = self.access(x_coord, y_coord);
+                    if field.eq(&Field::Empty) {
+                        return true;
+                    }
+                    x_coord += 1;
+                } else {
+                    return false;
+                }
+            }
         }
 
         pub fn print(&self) {
@@ -145,7 +155,7 @@ pub mod field_utils {
                         }
                     }
                     print!("{sep2}");
-                    print!("{}", ((chunk - 1) * 3 + row));
+                    print!("{}", (chunk - 1) * 3 + row);
                 }
                 print!("{sep1}");
             }
@@ -329,7 +339,7 @@ pub mod general {
                         time.as_secs() % 60
                     ),
                 }
-                println!("");
+                println!();
                 println!("'til the next time! (Press ENTER)");
                 get_input();
                 print!("\x1B[2J\x1B[1;1H");
@@ -400,7 +410,7 @@ pub mod general {
                         )
                     }
                 }
-                println!("");
+                println!();
                 println!("Press ENTER to continue");
                 get_input();
                 general_menu(stats)
